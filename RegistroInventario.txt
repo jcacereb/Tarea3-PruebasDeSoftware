@@ -1,0 +1,8 @@
+0,The Binding of Isaac,PC,Roguelike,10000,20000,6
+1,Dishonored,PC,Acción,15000,30000,10
+2,League of Legends,PC,MOBA,10000,15000,10
+3,Final Fantasy,Consola,RPG,30000,45000,2
+4,Counter Strike,PC,Shooter,20000,35000,8
+3,Final Fantasy,Consola,RPG,30000,45000,2
+4,Counter Strike,PC,Shooter,20000,35000,8
+0,The Binding of Isaac,PC,Roguelike,10000,20000,6
