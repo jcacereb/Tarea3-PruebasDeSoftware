@@ -1,5 +1,5 @@
+import unittest
 from datetime import datetime
-import msvcrt
 import os
 
 class DataBase:
@@ -79,9 +79,10 @@ class DataBase:
         os.makedirs(carpeta, exist_ok=True)
         file = open(ruta_archivo,"w")
         formato = "%d/%m/%Y %H:%M:%S"
-        file.write(f"Fecha: {datetime.now().strftime(formato)}\n\n")
-        file.write("Reporte de Compras\n")
-        file.write(f"-> Cantidad de Compras: {len(self.Compras)} compras realizadas.\n")
+        file.write(f"Fecha: {datetime.now().strftime(formato)}\n")
+        file.write("------------------------------------------------------------------------------------------------------------")
+        file.write("Reporte de Compras:\n")
+        file.write(f"Cantidad de compras realizadas: {len(self.Compras)}.\n")
         cantJuegos = 0
         costo = 0
         detalle = ""
@@ -89,8 +90,8 @@ class DataBase:
             cantJuegos += int(juego.count)
             costo += float(juego.priceBuy)*float(juego.count)
             detalle += juego.detailBuyToString()
-        file.write(f"-> Cantidad de Juegos Comprados: {cantJuegos} juegos.\n")
-        file.write(f"-> Costo total: $ {costo}.\n\n Detalle de Compra: \n"+detalle)
+        file.write(f"Cantidad de Juegos Comprados: {cantJuegos}\n")
+        file.write(f"Costo total: $ {costo}.\nDetalle de Compra: \n"+detalle)
 
         file.write("\nReporte de Ventas\n")
         cantJuegos = 0
@@ -100,8 +101,8 @@ class DataBase:
             cantJuegos += int(juego.count)
             costo += float(juego.priceSale)*float(juego.count)
             detalle += juego.detailSaleToString()
-        file.write(f"-> Cantidad de Juegos Vendidos: {cantJuegos} juegos.\n")
-        file.write(f"-> Venta total: $ {costo}.\n\n Detalle de la Venta: \n"+detalle)
+        file.write(f"Cantidad de Juegos Vendidos: {cantJuegos}\n")
+        file.write(f"Venta total: $ {costo}.\nDetalle de la Venta: \n"+detalle)
 
         file.close()
         return nombre
@@ -117,19 +118,19 @@ class Game:
         self.count = count
 
     def __repr__(self):
-        text = f"Producto:\n-> id: {self.id}\n-> title: {self.title}\n-> price buy/sale: {self.priceBuy}/{self.priceSale}\n-> platform: {self.platform}\n-> count: {self.count}"
+        text = f"Producto:\n=> id: {self.id}\n=> title: {self.title}\n=> price buy/sale: {self.priceBuy}/{self.priceSale}\n=> platform: {self.platform}\n=> count: {self.count}"
         return text
 
     def toString(self):
-        text = f"Juego {self.id}:\n-> Título: {self.title}\n-> Plataforma: {self.platform}\n-> Género: {self.genre}\n-> Precio Compra: {self.priceBuy}\n-> Precio Venta: {self.priceSale}\n-> Cantidad Disponible: {self.count}"
-        return text
+        text = f"Juego {self.id}:\n=> Título: {self.title}\n=> Plataforma: {self.platform}\n=> Género: {self.genre}\n=> Precio Compra: {self.priceBuy}\n=> Precio Venta: {self.priceSale}\n=> Cantidad Disponible: {self.count}"
+        return
 
     def detailBuyToString(self):
-        text = f"-> Título: {self.title} - Plataforma: {self.platform} - Género: {self.genre} - Precio Compra: {self.priceBuy} - Cantidad: {self.count}\n"
+        text = f"=> Título: {self.title} - Plataforma: {self.platform} - Género: {self.genre} - Precio Compra: {self.priceBuy} - Cantidad: {self.count}\n"
         return text
 
     def detailSaleToString(self):
-        text = f"-> Título: {self.title} - Plataforma: {self.platform} - Género: {self.genre} - Precio Venta: {self.priceSale} - Cantidad: {self.count}\n"
+        text = f"=> Título: {self.title} - Plataforma: {self.platform} - Género: {self.genre} - Precio Venta: {self.priceSale} - Cantidad: {self.count}\n"
         return text
 
     def detailSaleProduct(self):
@@ -141,26 +142,12 @@ class Game:
         return text
 
 
-def input_options(options, campo):
-    print(campo)
-    for i, option in enumerate(options, start=1):
-        print(f"{i}. {option}")
-
-    while True:
-        try:
-            key = msvcrt.getch()
-            key = key.decode("utf-8")
-
-            if key.isdigit() and int(key) in range(1, len(options) + 1):
-                index = int(key) - 1
-                return options[index]
-        except ValueError:
-            pass
-
 db = DataBase()
 db.ReadFile()
 
-def validGame(game):
+################## FUNCIONES DE PRUEBA #################################
+
+def validarJuego(game):
     if not isinstance(game.title, str) or game.title == "":
         return False
     if not isinstance(game.priceBuy, (int, float)) or game.priceBuy <= 0:
@@ -169,92 +156,57 @@ def validGame(game):
         return False
     if not isinstance(game.count, int) or game.count <= 0:
         return False
+    if not isinstance(game.genre, int):
+        return False
+    if not isinstance(game.platform,int):
+        return False
     return True
 
-def registerGame():
-    print("Ingrese los siguientes datos:")
-    title = input("Título: ")
-    priceBuy = float(input("Precio de Compra: "))
-    priceSale = float(input("Precio de Venta: "))
-    genero = input_options(db.Generos, "Seleccione un género:")
-    platform = input_options(db.Plataformas, "Selecciona una plataforma:")
-    cant = int(input("Cantidad: "))
-    id = db.index
-    game = Game(id, title, priceBuy, priceSale, genero, platform, cant)
-    addGameToInventory(id, game)
 
-def addGameToInventory(id, game):
-    if id in db.Inventario:
-        juego = db.Inventario[id]
-        juego.count += game.count
-    else:
-        if validGame(game):
-            db.Inventario[id] = game
-            db.updateIndex()
-            db.Compras.append(game)
-            print("Nuevo juego agregado al inventario.")
-        else:
-            print("Datos inválidos, por favor intentar de nuevo.")
+class Pruebas(unittest.TestCase):
 
-def buyGame():
-    juegoSeleccionado = input_options(db.listInventoryToSale(), "Ingrese id del juego a comprar:")
-    cantidad = int(input("Cantidad a comprar: "))
+    # TESTS CON RESPECTO A QUE LOS DATOS QUE DEBE TENER EL JUEGO SEAN VALIDOS
 
-    juego, valid, sms = validVenta(juegoSeleccionado, cantidad)
-    if valid:
-        respuesta = DoSale(juego, cantidad)
-        print(respuesta)
-    else:
-        print("Notificación:", sms)
+    def test_tituloNumeros(self):
+        juego = Game(0,1234,10,20,"RPG","Consola",10)
+        assert validarJuego(juego) == False
 
-def DoSale(juego, cantidad):
-    respaldo = juego.count
-    juego.count = cantidad
-    db.Ventas.append(juego)
-    juego.count = int(respaldo) - int(cantidad)
-    db.Inventario[juego.id] = juego
-    return "Compra realizada, muchas gracias."
-
-def validVenta(juegoSeleccionado, cantidad):
-    if cantidad <= 0:
-        return {}, False, "Ingrese una cantidad mayor que 0"
+    def test_tituloVacio(self):
+        juego = Game(0,"",10,20,"RPG","Consola",10)
+        assert validarJuego(juego) == False
     
-    for key, juego in db.Inventario.items():
-        if juego.detailSaleProduct() == juegoSeleccionado:
-            if int(juego.count) < cantidad:
-                return juego, False, "No hay stock suficiente"
-            break
+    def test_compraInvalida1(self):
+        juego = Game(0,"Compra Invalida igual a 0",0,20,"RPG","Consola",10)
+        assert validarJuego(juego) == False
+
+    def test_compraInvalida2(self):
+        juego = Game(0,"Compra Invalida menor a 0",0,20,"RPG","Consola",10)
+        assert validarJuego(juego) == False
+
+    def test_compraInvalida3(self):
+        juego = Game(0,"Compra Invalida, string","10",20,"RPG","Consola",10)
+        assert validarJuego(juego) == False
     
-    return juego, True, "ok"
+    def test_ventaInvalida1(self):
+        juego = Game(0,"Venta Invalida igual a 0",10,0,"RPG","Consola",10)
+        assert validarJuego(juego) == False
 
-perfilActual = input_options(db.Perfiles, "Ingresar como:")
+    def test_ventaInvalida2(self):
+        juego = Game(0,"Venta Invalida menor a 0",10,-20,"RPG","Consola",10)
+        assert validarJuego(juego) == False
 
-def show_MenuAdmin():
-    opciones = ["Registrar producto", "Ver catálogo de juegos", "Generar reporte", "Cerrar sesión"]
-    opcion = input_options(opciones, "\nAcciones disponibles:")
-    if opcion == opciones[0]:
-        registerGame()
-    elif opcion == opciones[1]:
-        print("Catálogo:")
-        db.showInventory()
-    elif opcion == opciones[2]:
-        db.reportTXT()
-    elif opcion == opciones[3]:
-        db.Save()
-        exit(0)
-    show_MenuAdmin()
+    def test_ventaInvalida3(self):
+        juego = Game(0,"Venta Invalida, string",10,"20","RPG","Consola",10)
+        assert validarJuego(juego) == False
+    
+    def test_generoInvalido(self):
+        juego = Game(0,"Género Invalido, número en vez de string",10,"20",0,"Consola",10)
+        assert validarJuego(juego) == False
+    
+    def test_consolaInvalida(self):
+        juego = Game(0,"Consola Invalida, número en vez de string",10,"20","RPG",0,10)
+        assert validarJuego(juego) == False
 
-def show_MenuCliente():
-    opciones = ["Comprar producto", "Cerrar sesión"]
-    opcion = input_options(opciones, "\nAcciones disponibles:")
-    if opcion == opciones[0]:
-        buyGame()
-    elif opcion == opciones[1]:
-        db.Save()
-        exit(0)
-    show_MenuCliente()
 
-if perfilActual == "Administrador":
-    show_MenuAdmin()
-else:
-    show_MenuCliente()
+if __name__ == '__main__':
+    unittest.main()
